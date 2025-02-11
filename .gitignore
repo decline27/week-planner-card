@@ -4,3 +4,7 @@ node_modules/
 dist/week-planner-card.js
 dist/week-planner-card.js.map
 
+
+
+# Added by Homey CLI
+/.homeybuild/

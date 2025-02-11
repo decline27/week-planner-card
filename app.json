@@ -1,0 +1,53 @@
+{
+  "id": "com.example.weekplanner",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "name": {
+    "en": "Week Planner"
+  },
+  "description": {
+    "en": "Weekly schedule planner with calendar integration"
+  },
+  "category": [
+    "tools"
+  ],
+  "permissions": [
+ 
+  ],
+  "images": {
+    "large": "assets/images/large.png",
+    "small": "assets/images/small.png"
+  },
+  "author": {
+    "name": "Your Name"
+  },
+  "drivers": [],
+  "settings": [
+    {
+      "id": "calendars",
+      "type": "text",
+      "title": "Calendars (comma separated)"
+    },
+    {
+      "id": "days",
+      "type": "slider",
+      "title": "Number of days",
+      "default": 7
+    },
+    {
+      "id": "weather",
+      "type": "text",
+      "title": "Weather source"
+    }
+  ],
+  "apps": [{
+    "id": "weekplanner",
+    "name": "Week Planner",
+    "class": "driver",
+    "path": "widgets/widget.html",
+    "icon": "src/icons/windy.svg",
+    "capabilities": ["calendar", "weather"],
+    "uiComponents": ["widget"]
+  }]
+}
