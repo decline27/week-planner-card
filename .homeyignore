@@ -1,0 +1,5 @@
+node_modules/
+*.map
+tests/
+docs/
+// ...any other files/folders not required in production...

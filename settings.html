@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Week Planner Settings</title>
+	<!-- ...existing code... -->
+</head>
+<body>
+	<form id="settingsForm">
+		<label for="updateInterval">Update Interval (seconds):</label>
+		<input type="number" id="updateInterval" name="updateInterval" min="1" required>
+		
+		<label for="days">Number of Days:</label>
+		<input type="number" id="days" name="days" min="1" required>
+    
+		<label for="googleCalendarId">Google Calendar ID:</label>
+		<input type="text" id="googleCalendarId" name="googleCalendarId" required>
+		
+		<button type="submit">Save</button>
+	</form>
+	
+	<script>
+		// ...existing code...
+		// Example: Load current settings (using Homey API or fallback to local settings)
+		// Homey.settings.get() would normally be used here.
+		document.addEventListener('DOMContentLoaded', function() {
+			// Pretend to load settings
+			// Replace with actual Homey.settings.get calls as needed
+			const settings = {
+				updateInterval: 60,
+				days: 7,
+				googleCalendarId: ''
+			};
+			document.getElementById('updateInterval').value = settings.updateInterval;
+			document.getElementById('days').value = settings.days;
+			document.getElementById('googleCalendarId').value = settings.googleCalendarId;
+		});
+		
+		// Save settings when form is submitted
+		document.getElementById('settingsForm').addEventListener('submit', function(e) {
+			e.preventDefault();
+			const newSettings = {
+				updateInterval: parseInt(document.getElementById('updateInterval').value),
+				days: parseInt(document.getElementById('days').value),
+				googleCalendarId: document.getElementById('googleCalendarId').value
+			};
+			// Use Homey's API to save settings, e.g., Homey.settings.set(newSettings)
+			console.log('Settings saved:', newSettings);
+		});
+	</script>
+</body>
+</html>

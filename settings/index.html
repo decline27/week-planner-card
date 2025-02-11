@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Week Planner Settings</title>
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--color-text-primary, #333);
+    }
+    .settings-container {
+      background: var(--color-background-secondary, #fff);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--color-border, #ccc);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      background: var(--color-primary, #0288d1);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: var(--color-primary-dark, #01579b);
+    }
+    .error {
+      color: var(--color-error, #d32f2f);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .success {
+      color: var(--color-success, #2e7d32);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-container">
+    <h1>Week Planner Settings</h1>
+    <form id="settingsForm">
+      <div class="form-group">
+        <label for="updateInterval">Update Interval (seconds)</label>
+        <input type="number" id="updateInterval" name="updateInterval" min="30" value="60" required>
+      </div>
+      <div class="form-group">
+        <label for="days">Number of Days to Display</label>
+        <input type="number" id="days" name="days" min="1" max="31" value="7" required>
+      </div>
+      <div class="form-group">
+        <label for="googleCalendarId">Google Calendar ID</label>
+        <input type="text" id="googleCalendarId" name="googleCalendarId" placeholder="your-calendar-id@group.calendar.google.com" required>
+      </div>
+      <button type="submit" id="saveButton">Save Settings</button>
+    </form>
+    <div id="errorMessage" class="error hidden"></div>
+    <div id="successMessage" class="success hidden"></div>
+  </div>
+
+  <script>
+    // Helper function: Try multiple methods to get app settings
+    async function getAppSettings() {
+      if (typeof Homey.getAppSettings === 'function') {
+        return await Homey.getAppSettings();
+      } else if (Homey.apps && typeof Homey.apps.getAppSettings === 'function') {
+        return await Homey.apps.getAppSettings();
+      } else if (Homey.settings && typeof Homey.settings.get === 'function') {
+        return await Homey.settings.get();
+      }
+      throw new Error('No available method to retrieve app settings');
+    }
+
+    // Helper function: Try multiple methods to set app settings
+    async function setAppSettings(newSettings) {
+      if (typeof Homey.setAppSettings === 'function') {
+        return await Homey.setAppSettings(newSettings);
+      } else if (Homey.apps && typeof Homey.apps.setAppSettings === 'function') {
+        return await Homey.apps.setAppSettings(newSettings);
+      } else if (Homey.settings && typeof Homey.settings.set === 'function') {
+        return await Homey.settings.set(newSettings);
+      }
+      throw new Error('No available method to save app settings');
+    }
+
+    // Initialize settings form
+    async function initializeSettings() {
+      console.log('Initializing settings form...');
+      try {
+        const settings = await getAppSettings();
+        console.log('Retrieved settings:', settings);
+        if (settings) {
+          document.getElementById('updateInterval').value = settings.updateInterval || 60;
+          document.getElementById('days').value = settings.days || 7;
+          document.getElementById('googleCalendarId').value = settings.googleCalendarId || '';
+          console.log('Settings form initialized with values:', {
+            updateInterval: settings.updateInterval || 60,
+            days: settings.days || 7,
+            googleCalendarId: settings.googleCalendarId || ''
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+        showError('Failed to load settings: ' + error.message);
+      }
+    }
+
+    // Save settings
+    async function saveSettings(event) {
+      event.preventDefault();
+      const saveButton = document.getElementById('saveButton');
+      saveButton.disabled = true;
+      console.log('Attempting to save settings...');
+
+      try {
+        const settings = {
+          updateInterval: parseInt(document.getElementById('updateInterval').value, 10),
+          days: parseInt(document.getElementById('days').value, 10),
+          googleCalendarId: document.getElementById('googleCalendarId').value.trim()
+        };
+        console.log('Validating settings:', settings);
+
+        // Validate settings
+        if (settings.updateInterval < 30) {
+          throw new Error('Update interval must be at least 30 seconds');
+        }
+        if (settings.days < 1 || settings.days > 31) {
+          throw new Error('Number of days must be between 1 and 31');
+        }
+        if (!settings.googleCalendarId) {
+          throw new Error('Google Calendar ID is required');
+        }
+
+        // Save settings using the available Homey API method
+        console.log('Saving settings to Homey API:', settings);
+        await setAppSettings(settings);
+        console.log('Settings saved successfully');
+        showSuccess('Settings saved successfully!');
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+        showError('Failed to save settings: ' + error.message);
+      } finally {
+        saveButton.disabled = false;
+      }
+    }
+
+    function showError(message) {
+      console.error('Showing error message:', message);
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('hidden');
+      successDiv.classList.add('hidden');
+    }
+
+    function showSuccess(message) {
+      console.log('Showing success message:', message);
+      const errorDiv = document.getElementById('errorMessage');
+      const successDiv = document.getElementById('successMessage');
+      successDiv.textContent = message;
+      successDiv.classList.remove('hidden');
+      errorDiv.classList.add('hidden');
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initializeSettings);
+
+    // Add form submit handler
+    document.getElementById('settingsForm').addEventListener('submit', saveSettings);
+
+    // Optionally, if Homey calls onHomeyReady (depending on your version), you can use:
+    function onHomeyReady(Homey) {
+      console.log('Homey is ready');
+      initializeSettings();
+      Homey.ready();
+    }
+  </script>
+</body>
+</html>

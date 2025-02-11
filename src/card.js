@@ -209,6 +209,11 @@ export class WeekPlannerCard extends LitElement {
         );
     }
 
+    connectedCallback() {
+        super.connectedCallback();
+        console.log('WeekPlannerCard loaded');
+    }
+
     _getWeatherConfig(weatherConfiguration) {
         if (
             !weatherConfiguration
